@@ -9,7 +9,6 @@ def setup():
             source TEXT NOT NULL,
             url TEXT NOT NULL,
             published_at DATE NOT NULL,
-            cluster INTEGER DEFAULT NULL,
             named_entities TEXT[] DEFAULT NULL
         );''',
     ]

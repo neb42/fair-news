@@ -1,10 +1,17 @@
+import os
 import psycopg2
+
+DB_HOST = os.environ['DB_HOST']
+DB_DATABASE = os.environ['DB_DATABASE']
+DB_USER = os.environ['DB_USER']
+DB_PASSWORD = os.environ['DB_PASSWORD']
 
 def connect():
     connection = psycopg2.connect(
-        host='',                       # host on which the database is running
-        database='',                                                      # name of the database to connect to
-        user='',                                                          # username to connect with
-        password=''     # password associated with your username
+        host=DB_HOST,
+        database=DB_DATABASE,
+        user=DB_USER,
+        password=DB_PASSWORD
     )
     return connection
+    
