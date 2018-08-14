@@ -21,13 +21,13 @@ class RawArticle:
         url, 
         title,
         description,
-        source,
+        source_id,
         published_at,
     ):
         self.url = url
         self.title = title
         self.description = description
-        self.source = source,
+        self.source_id = source_id
         self.published_at = published_at
 
         

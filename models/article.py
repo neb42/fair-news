@@ -1,5 +1,4 @@
 import os
-import uuid
 from goose3 import Goose
 from nltk import ne_chunk, pos_tag, word_tokenize
 from nltk.tree import Tree
@@ -23,24 +22,22 @@ class Article:
         url, 
         title,
         description,
-        source,
+        source_id,
         published_at,
-        id=None,
         named_entities=None,
+        id=None
     ):
         self.url = url
         self.title = title
         self.description = description
-        self.source = source,
+        self.source_id = source_id
+        self.id = id
+
         if type(published_at) is str:
             self.published_at = parser.parse(published_at)
         else:
             self.published_at = published_at
-        if id:
-            self.id = id
-        else:
-            self.id = uuid.uuid4()
-        
+
         if named_entities:
             self.named_entities = named_entities
         else:
@@ -75,7 +72,7 @@ class Article:
                         a.url,
                         a.title,
                         a.description,
-                        a.source,
+                        a.source_id,
                         a.published_at,
                     ))
                 except Exception as e:
@@ -95,7 +92,7 @@ class Article:
                             article.url,
                             article.title,
                             article.description,
-                            article.source,
+                            article.source_id,
                             article.published_at,
                         ))
                     except Exception as e:
@@ -155,10 +152,10 @@ class Article:
                         row['url'],
                         row['title'],
                         row['description'],
-                        row['source'],
+                        row['source_id'],
                         row['published_at'],
-                        row['article_id'],
                         row['named_entities'],
+                        row['id'],
                     ))
         return articles
 
@@ -168,21 +165,20 @@ class Article:
             if not article.description or not article.title or len(article.named_entities) == 0:
                 print(article.url)
                 return None
-            id = article.id
             url = article.url
             title = article.title.replace("'", '"')
             description = article.description.replace("'", '"')
-            source = "placeholder" # article.source
+            source_id = article.source_id
             published_at = article.published_at
             foo = "','".join(map(lambda x: x.replace("'", '"'), article.named_entities))
             named_entities = f"ARRAY['{foo}']"
-            return f"('{id}', '{url}', '{title}', '{description}', '{source}', '{published_at}', {named_entities})"
+            return f"('{url}', '{title}', '{description}', '{source_id}', '{published_at}', {named_entities})"
         value_strings_with_none = map(build_value_str, articles)
         value_strings = [x for x in value_strings_with_none if x is not None]
         values = ', '.join(value_strings)
         query = f'''
             INSERT INTO articles
-            (article_id, url, title, description, source, published_at, named_entities)
+            (url, title, description, source_id, published_at, named_entities)
             VALUES {values};
         '''
         with connect() as conn:
