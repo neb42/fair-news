@@ -26,6 +26,7 @@ def setup():
         'CREATE SEQUENCE articles_id_seq;',
         '''CREATE TABLE articles (
             id BIGINT DEFAULT NEXTVAL('articles_id_seq') CONSTRAINT articles_id_seq_pkey PRIMARY KEY,
+            article_uuid UUID NOT NULL UNIQUE,
             title TEXT NOT NULL,
             description TEXT NOT NULL,
             source_id TEXT NOT NULL,

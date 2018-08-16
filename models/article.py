@@ -1,4 +1,5 @@
 import os
+import uuid
 from goose3 import Goose
 from nltk import ne_chunk, pos_tag, word_tokenize
 from nltk.tree import Tree
@@ -24,13 +25,16 @@ class Article:
         description,
         source_id,
         published_at,
+        article_uuid=None,
         named_entities=None,
-        id=None
+        id=None,
+        raw_content=None
     ):
         self.url = url
         self.title = title
         self.description = description
         self.source_id = source_id
+        self.article_uuid = article_uuid or uuid.uuid4()
         self.id = id
 
         if type(published_at) is str:
@@ -41,8 +45,8 @@ class Article:
         if named_entities:
             self.named_entities = named_entities
         else:
-            raw_content = goose.extract(url=url).cleaned_text
-            self.named_entities = self.extract_named_entities(raw_content)
+            self.raw_content = goose.extract(url=url).cleaned_text
+            self.named_entities = self.extract_named_entities(self.raw_content)
         
     def extract_named_entities(self, text):
         chunked = ne_chunk(pos_tag(word_tokenize(text)))
@@ -76,9 +80,6 @@ class Article:
                         a.published_at,
                     ))
                 except Exception as e:
-                    print('Error building article')
-                    print(e)
-                    print(article)
                     continue
             return articles
         
@@ -96,13 +97,7 @@ class Article:
                             article.published_at,
                         ))
                     except Exception as e:
-                        errors.append({
-                            'article': article,
-                            'error': e,
-                        })
-                print('Error')
-                print(len(errors))
-                print(map(lambda x: x.url, errors))
+                        continue
                 q.put(results)
                 
             q = Queue()
@@ -128,7 +123,7 @@ class Article:
         else:
             print('Running on single core')
             articles = single_core_article_builder()
-        print('Finished')
+        print('Finished building articles')
         return articles
         
     @staticmethod
@@ -154,6 +149,7 @@ class Article:
                         row['description'],
                         row['source_id'],
                         row['published_at'],
+                        row['article_uuid'],
                         row['named_entities'],
                         row['id'],
                     ))
@@ -170,15 +166,16 @@ class Article:
             description = article.description.replace("'", '"')
             source_id = article.source_id
             published_at = article.published_at
+            article_uuid = article.article_uuid
             foo = "','".join(map(lambda x: x.replace("'", '"'), article.named_entities))
             named_entities = f"ARRAY['{foo}']"
-            return f"('{url}', '{title}', '{description}', '{source_id}', '{published_at}', {named_entities})"
+            return f"('{url}', '{title}', '{description}', '{source_id}', '{published_at}', '{article_uuid}', {named_entities})"
         value_strings_with_none = map(build_value_str, articles)
         value_strings = [x for x in value_strings_with_none if x is not None]
         values = ', '.join(value_strings)
         query = f'''
             INSERT INTO articles
-            (url, title, description, source_id, published_at, named_entities)
+            (url, title, description, source_id, published_at, article_uuid, named_entities)
             VALUES {values};
         '''
         with connect() as conn:
