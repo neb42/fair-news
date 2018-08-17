@@ -16,12 +16,12 @@ import './Source.css';
 type Props = {
   nextSource: Function,
   source: {
-    source_id: string,
+    sourceId: string,
     name: string,
     description: string,
     url: string,
-    language_code: string,
-    country_code: string,
+    languageCode: string,
+    countryCode: string,
   },
 };
 
@@ -29,6 +29,9 @@ type State = {
   politicalBias: null | 0 | 1 | 2,
   reliability: null | 0 | 1,
 };
+
+const positionToBias = [ 'left', 'center', 'right' ];
+const postionToReliability = [ 'reliable', 'unreliable' ];
 
 export default class Source extends React.Component<Props, State> {
   props: Props;
@@ -38,10 +41,10 @@ export default class Source extends React.Component<Props, State> {
   };
   
   handleSubmit = async () => {
-    const { nextSource, source: { source_id }} = this.props;
-    const { politicalBias, reliability } = this.props;
+    const { nextSource, source: { sourceId }} = this.props;
+    const { politicalBias, reliability } = this.state;
     if (politicalBias && reliability) {
-      submitSourceBias();
+      submitSourceBias(sourceId, politicalBias, reliability);
       nextSource();
     }
   }
@@ -62,6 +65,7 @@ export default class Source extends React.Component<Props, State> {
     const {
       nextSource,
       source: {
+        sourceId,
         name,
         description,
         url,
@@ -70,7 +74,7 @@ export default class Source extends React.Component<Props, State> {
     const { politicalBias, reliability } = this.state;
 
     return (
-      <div className="Source" >
+      <div className="Source" key={sourceId} >
         <div className="Source__favicon" >
           <img
             src={`https://plus.google.com/_/favicon?domain_url=${url}`}

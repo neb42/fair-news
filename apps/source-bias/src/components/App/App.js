@@ -10,12 +10,12 @@ import './App.css';
 type State = {
   sourceIdx: number,
   sources: Array<{
-    source_id: string,
+    sourceId: string,
     name: string,
     description: string,
     url: string,
-    language_code: string,
-    country_code: string,
+    languageCode: string,
+    countryCode: string,
   }>,
 };
 

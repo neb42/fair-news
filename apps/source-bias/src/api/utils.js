@@ -19,13 +19,6 @@ const checkStatus = (response: Response) => {
   throw error;
 };
 
-
-export const addBearerToken = (token: string, config: Object = {}) => {
-  config.headers = config.headers || {};
-  config.headers.Authorization = `Bearer ${token}`;
-  return config;
-};
-
 export const addBody = (
   body: Object | Array<*>,
   config: Object,
@@ -35,6 +28,7 @@ export const addBody = (
   config.headers.Accept = 'application/json';
   config.headers['Content-Type'] = 'application/json';
   config.method = method;
+  config.credentials = 'include';
   config.body = JSON.stringify(body);
   return config;
 };
@@ -68,7 +62,7 @@ const makeDeleteRequestConfig = (
 };
 
 export const get = (uri: string) => {
-  return fetch(uri)
+  return fetch(uri, { credentials: 'include' })
     .then(checkStatus)
     .then(parseJSON);
 }

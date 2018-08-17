@@ -23,12 +23,12 @@ app = Flask(__name__, static_folder='build')
 def get_source_list():
     sources = Source.load_from_db()
     return jsonify({ 'sources': list(map(lambda x: {
-        'source_id': x.source_id,
+        'sourceId': x.source_id,
         'name': x.name,
         'description': x.description,
         'url': x.url,
-        'language_code': x.language_code,
-        'country_code': x.country_code,
+        'languageCode': x.language_code,
+        'countryCode': x.country_code,
     }, sources)) })
     
 def _parse_request_body():
@@ -43,13 +43,18 @@ def _parse_request_body():
         }
         response = make_response(jsonify(response_body), 400)
         abort(response)
-    return politicalBias, reliability
+    return political_bias, reliability
 
 @app.route('/api/source/<source_id>/bias', methods=['POST'])
 def submit_source_bias(source_id):
     political_bias, reliability = _parse_request_body()
-    SourceBias.insert_row(SourceBias(source_id, request.remote_addr, political_bias, reliability))
-    return ('', 201)
+    if request.headers.get("X-Forwarded-For"):
+      ip = request.headers.get("X-Forwarded-For").split(', ')[0]
+    else:
+      ip = request.remote_addr
+    logging.info('Submitting bias: source {}, ip {}, pb {}, rel {}'.format(source_id, ip, political_bias, reliability))
+    SourceBias.insert_row(SourceBias(source_id, ip, political_bias, reliability))
+    return ('', 204)
 
 # Serve React App
 @app.route('/', defaults={'path': ''})
