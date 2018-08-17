@@ -137,7 +137,6 @@ class Article:
                 query += ' AND'
         if to_date:
             query += f" published_at < '{to_date}'"
-        print(query)
         articles = []
         with connect() as conn:
             with conn.cursor(cursor_factory = psycopg2.extras.DictCursor) as cur:
@@ -159,7 +158,6 @@ class Article:
     def bulk_insert(articles):
         def build_value_str(article):
             if not article.description or not article.title or len(article.named_entities) == 0:
-                print(article.url)
                 return None
             url = article.url
             title = article.title.replace("'", '"')
