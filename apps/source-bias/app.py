@@ -1,12 +1,12 @@
-# coding: utf-8
-
 import os
 import sys
-module_path = os.path.abspath(os.path.join('..'))
+
+module_path = os.path.abspath(os.path.join('../..'))
 if module_path not in sys.path:
     sys.path.append(module_path)
 
 import logging
+from flask import Flask, send_from_directory
 from datetime import datetime, timedelta
 from flask import Flask, jsonify, request, abort, make_response
 
@@ -15,12 +15,12 @@ from models.source_bias import SourceBias
 
 logging.basicConfig(level=logging.INFO)
 
-flask_server = Flask(__name__)
-
 PORT = 8000
 
-@flask_server.route('/source', methods=['GET'])
-def get_sources():
+app = Flask(__name__, static_folder='build')
+
+@app.route('/api/source', methods=['GET'])
+def get_source_list():
     sources = Source.load_from_db()
     return jsonify({ 'sources': list(map(lambda x: {
         'source_id': x.source_id,
@@ -30,8 +30,7 @@ def get_sources():
         'language_code': x.language_code,
         'country_code': x.country_code,
     }, sources)) })
-
-
+    
 def _parse_request_body():
     request_body = request.get_json(force=True)
     try:
@@ -46,13 +45,21 @@ def _parse_request_body():
         abort(response)
     return politicalBias, reliability
 
-
-@flask_server.route('/source/<source_id>', methods=['POST'])
-def create_source_bias(source_id):
+@app.route('/api/source/<source_id>/bias', methods=['POST'])
+def submit_source_bias(source_id):
     political_bias, reliability = _parse_request_body()
     SourceBias.insert_row(SourceBias(source_id, request.remote_addr, political_bias, reliability))
     return ('', 201)
 
+# Serve React App
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists('build/' + path):
+        return send_from_directory('build', path)
+    else:
+        return send_from_directory('build', 'index.html')
+
+
 if __name__ == '__main__':
-    logging.info('Listening on port {}'.format(PORT))
-    flask_server.run(debug=True, host='127.0.0.1', port=PORT)
+    app.run(debug=True, host='127.0.0.1', port=PORT)

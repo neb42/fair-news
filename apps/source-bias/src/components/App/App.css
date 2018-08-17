@@ -1,0 +1,20 @@
+.App {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background-color: #f1f4f7;
+}
+
+.App-header {
+  background-color: #22333e;
+  padding: 10px;
+  color: white;
+  width: 100%;
+}
+
+.App-title {
+  font-size: 1.5em;
+}
