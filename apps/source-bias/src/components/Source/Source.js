@@ -5,6 +5,7 @@ import {
   Button,
   RadioButtonGroup,
   RadioButton,
+  PALETTE,
 } from '@asidatascience/adler-ui';
 
 import {
@@ -43,8 +44,12 @@ export default class Source extends React.Component<Props, State> {
   handleSubmit = async () => {
     const { nextSource, source: { sourceId }} = this.props;
     const { politicalBias, reliability } = this.state;
-    if (politicalBias && reliability) {
-      submitSourceBias(sourceId, politicalBias, reliability);
+    if (politicalBias !== null || reliability !== null) {
+      submitSourceBias(
+        sourceId,
+        positionToBias[politicalBias],
+        postionToReliability[reliability]
+      );
       nextSource();
     }
   }
@@ -112,6 +117,7 @@ export default class Source extends React.Component<Props, State> {
           <Button
             text="Skip"
             onClick={this.handleSkip}
+            backgroundColor={PALETTE.black}
           />
           <Button
             text="Submit"
