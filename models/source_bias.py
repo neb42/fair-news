@@ -39,7 +39,7 @@ class SourceBias:
         query = f'''
             INSERT INTO source_bias
             (source_id, ip_address, political_bias, reliability)
-            VALUES ({source.source_id}, {source.ip_address}, {source.political_bias}, {source.reliability});
+            VALUES ('{source_bias.source_id}', '{source_bias.ip_address}', '{source_bias.political_bias}', '{source_bias.reliability}');
         '''
         with connect() as conn:
             with conn.cursor() as cur:
