@@ -92,7 +92,7 @@ def release_lock():
 def get_todays_dataframe():
   if TODAY_CSV in sfs.ls():
     sfs.get(TODAY_CSV, TMP_CSV)
-    df = pd.read_csv(TMP_CSV)
+    df = pd.read_csv(TMP_CSV, sep='\t', encoding='utf-8')
     if os.path.exists(TMP_CSV):
       os.remove(TMP_CSV)
     return df
@@ -103,7 +103,7 @@ def save_data_frame(df):
   df.to_csv(TMP_CSV, sep='\t', encoding='utf-8', index=False)
   sfs.put(TMP_CSV, TODAY_CSV)
 
-def parse_article(bias_level, bias, source_label, source_name, article_url):
+def parse_article(bias_level, bias, source_label, source_name, article_url, article_title):
   try:
     session = HTMLSession()
     response = session.get(article_url)
@@ -162,6 +162,7 @@ def parse_article(bias_level, bias, source_label, source_name, article_url):
       'article_title': '',
       'article_content': article_content,
       'article_url': article_url,
+      'article_title': article_title,
     }
     return row
   # print('Failed to find content for ' + article_url)
@@ -177,7 +178,7 @@ def parse_source(bias_level, bias, source_label, source_name, source_url):
   rows = []
   for article in feed['items']:
     rows.append(
-      parse_article(bias_level, bias, source_label, source_name, article['link'])
+      parse_article(bias_level, bias, source_label, source_name, article['link'], article['title'])
     )
 
   print('Successfully parsed ' + str(len(rows)) + ' articles for source ' + source_name)
