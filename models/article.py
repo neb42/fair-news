@@ -36,7 +36,7 @@ source_id_to_bias = {
 class Article:
     def __init__(
         self,
-        url, 
+        url,
         title,
         description,
         source_id,
@@ -73,7 +73,7 @@ class Article:
             self.named_entities = named_entities
         else:
             self.named_entities = self.extract_named_entities(self.raw_content)
-        
+
     def extract_named_entities(self, text):
         chunked = ne_chunk(pos_tag(word_tokenize(text)))
         prev = None
@@ -90,12 +90,12 @@ class Article:
                 else:
                     continue
         return continuous_chunk
-        
+
     @staticmethod
     def build_articles(raw_articles, sequential=False):
         def single_core_article_builder():
             articles = []
-        
+
             for a in raw_articles:
                 try:
                     articles.append(Article(
@@ -108,7 +108,7 @@ class Article:
                 except Exception as e:
                     continue
             return articles
-        
+
         def multi_core_article_builder():
             def doWork(q, a):
                 results = []
@@ -125,7 +125,7 @@ class Article:
                     except Exception as e:
                         continue
                 q.put(results)
-                
+
             q = Queue()
             subprocesses = []
             for i in range(CORES):
@@ -134,15 +134,15 @@ class Article:
                 p = Process(target=doWork, args=(q, raw_articles[start:end]))
                 p.start()
                 subprocesses.append(p)
-        
+
             articles = []
             for i in range(CORES):
                 articles.extend(q.get(True))
             while subprocesses:
                 subprocesses.pop().join()
             return articles
-        
-    
+
+
         if not sequential and CORES > 1:
             print(f'Running on {CORES} cores')
             articles = multi_core_article_builder()
@@ -151,7 +151,7 @@ class Article:
             articles = single_core_article_builder()
         print('Finished building articles')
         return articles
-        
+
     @staticmethod
     def load_articles_from_datasets(article_date):
         articles = []
