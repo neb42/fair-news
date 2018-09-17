@@ -37,15 +37,24 @@ class Article:
         self.article_uuid = article_uuid or uuid.uuid4()
         self.id = id
 
+        if any(a is None for a in [ published_at, named_entities, raw_content ]):
+            goose_article = goose.extract(url=url)
+
+        if published_at is None:
+            published_at = goose_article.publish_datetime_utc
         if type(published_at) is str:
             self.published_at = parser.parse(published_at)
         else:
             self.published_at = published_at
 
+        if raw_content:
+            self.raw_content = raw_content
+        else:
+            self.raw_content = goose_article.cleaned_text
+
         if named_entities:
             self.named_entities = named_entities
         else:
-            self.raw_content = goose.extract(url=url).cleaned_text
             self.named_entities = self.extract_named_entities(self.raw_content)
         
     def extract_named_entities(self, text):
