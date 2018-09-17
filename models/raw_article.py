@@ -37,15 +37,18 @@ class RawArticle:
         raw_articles = []
         newsapi = NewsApiClient(api_key=API_KEY)
         while True:
-            response = newsapi.get_everything(
-                sources=','.join(NEWS_SOURCES),
-                from_param=from_date,
-                to=to_date,
-                language='en',
-                sort_by='publishedAt',
-                page=page,
-                page_size=PAGE_SIZE,
-            )
+            try:
+                response = newsapi.get_everything(
+                    sources=','.join(NEWS_SOURCES),
+                    from_param=from_date,
+                    to=to_date,
+                    language='en',
+                    sort_by='publishedAt',
+                    page=page,
+                    page_size=PAGE_SIZE,
+                )
+            except:
+                break;
             if response['status'] != 'ok':
                 raise Exception('Error querying news api', response)
             raw_articles += response['articles']
