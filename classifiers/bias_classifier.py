@@ -1,20 +1,20 @@
-__author__ = "Masha Ivenskaya"
 
-from argparse import ArgumentParser
+import sys
 import pickle
-import numpy as np
-from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.pipeline import FeatureUnion
-from sklearn.pipeline import Pipeline
+import logging
+from time import time
+from time import strftime
+from argparse import ArgumentParser
 from collections import defaultdict
-import sys 
+
+import numpy as np
 import pandas as pd
 from sklearn.utils import shuffle
-from time import strftime
-from time import time
-import logging
+from sklearn.pipeline import Pipeline
+from sklearn.pipeline import FeatureUnion
 from sklearn.linear_model import LogisticRegression
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 class ItemSelector(BaseEstimator, TransformerMixin):
@@ -27,6 +27,7 @@ class ItemSelector(BaseEstimator, TransformerMixin):
     def transform(self, data_dict):
         return data_dict[self.key]
 
+
 class HeadlineBodyFeaturesExtractor(BaseEstimator, TransformerMixin):
     """Extracts the components of each input in the data: headline, body, and POS tags for each"""
     def fit(self, x, y=None):
@@ -38,6 +39,7 @@ class HeadlineBodyFeaturesExtractor(BaseEstimator, TransformerMixin):
             features['headline'][idx] = row[0]
             features['article_body'][idx] = row[1]
         return features
+
 
 class BiasClassifier(object):
     def __init__(
@@ -115,15 +117,15 @@ class BiasClassifier(object):
             tick = time()
             logging.info("Training new model with %s" % (train_path,))
             logging.info("Loading/shuffling training data...")
-        
+
         train_data_1 = pd.read_csv(train_path, sep='\t', encoding='utf-8')
         shuffle(train_data_1)
         train_texts_1 = list(zip(
-          train_data_1.article_title.values.astype('U'), 
+          train_data_1.article_title.values.astype('U'),
           train_data_1.article_content.values.astype('U'),
         ))
         train_labels_1 = [0 if x == 0 else 1 for x in train_data_1.bias.values]
-        
+
         if self.debug:
         	logging.info('Fitting training data')
         pipeline_1 = self.create_pipeline()
@@ -140,13 +142,13 @@ class BiasClassifier(object):
         pipeline_2 = self.create_pipeline()
         pipeline_2.fit(train_texts_2, train_labels_2)
         return pipeline_1, pipeline_2
-      
+
 
     def classify(self, inputs):
         """ Classifies inputs """
         responses = []
         test_data = [list(a) for a in zip(
-          inputs.article_title.values.astype('U'), 
+          inputs.article_title.values.astype('U'),
           inputs.article_content.values.astype('U'),
         )]
         
@@ -166,53 +168,3 @@ class BiasClassifier(object):
             responses.append(result)
         output = inputs.assign(bias_prediction = pd.Series(responses).values)
         return output
-
-def main():
-    logging.basicConfig(level=logging.INFO)
-
-    argparser = ArgumentParser(description=__doc__)
-    argparser.add_argument("-t", "--trainset", action="store",
-                           default=None,
-                           help=("Path to training data "
-                                 "[default: %(default)s]"))
-    argparser.add_argument("-m", "--model", action="store",
-                           help="Path to model")
-    argparser.add_argument("-d", "--dump", action="store_true",
-                           help="Pickle trained model? [default: False]")
-    argparser.add_argument("-v", "--verbose", action="store_true",
-                           default=False,
-                           help="Verbose [default: quiet]")
-    argparser.add_argument("-c", "--classify", action="store",
-                           default=None,
-                           help=("Path to data to classify "
-                                 "[default: %(default)s]"))
-    argparser.add_argument("-s", "--save", action="store",
-                           default='output.csv',
-                           help=("Path to output file"
-                                 "[default = output.csv]"))
-    args = argparser.parse_args()
-
-
-    clf = BiasClassifier(
-        train_data=args.trainset,
-        model=args.model,
-        dump=args.dump,
-        debug=args.verbose
-    )
-
-    if args.classify:
-        OUTPUT_PATH = args.save
-
-        if clf.debug:
-            tick = time()
-        to_classify = Datasheet.load(args.classify)
-        classified_data = clf.classify(to_classify)
-        output = Datasheet(classified_data)
-        output.save(pd(OUTPUT_PATH))
-
-        if clf.debug:
-            sys.stderr.write("\nProcessed %d items in %0.2fs" %
-                            (len(classified_data), time() - tick))
-
-if __name__ == "__main__":
-    main()
