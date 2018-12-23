@@ -8,7 +8,7 @@ if '/project/fair-news' not in sys.path:
 
 import tempfile
 import pandas as pd
-import sherlockml.filesystem as sfs
+import sherlockml import datasets
 from datetime import datetime, timedelta
 
 from models.article import Article
@@ -46,4 +46,4 @@ tmp = tempfile.NamedTemporaryFile()
 with open(tmp.name, 'w') as f:
     df.to_csv(tmp.name, sep='\t', encoding='utf-8', index=False)
 date_str = from_date.strftime('%Y-%m-%d')
-sfs.put(tmp.name, f'/input/article_content/{date_str}.csv')
+datasets.put(tmp.name, f'/input/article_content/{date_str}.csv')

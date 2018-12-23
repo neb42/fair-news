@@ -9,7 +9,7 @@ if '/project/fair-news' not in sys.path:
 import tempfile
 import click
 import pandas as pd
-import sherlockml.filesystem as sfs
+import sherlockml import datasets
 from dateutil import parser
 from datetime import datetime, timedelta
 
@@ -48,7 +48,7 @@ def fetch_and_save_articles_in_date_range(from_date, to_date):
   with open(tmp.name, 'w') as f:
     df.to_csv(tmp.name, sep='\t', encoding='utf-8', index=False)
   date_str = from_date.strftime('%Y-%m-%d')
-  sfs.put(tmp.name, f'/input/article_content/{date_str}.csv')
+  datasets.put(tmp.name, f'/input/article_content/{date_str}.csv')
   
 def split_date_range_into_days(from_date, to_date):
   start_dates = [from_date.date()]

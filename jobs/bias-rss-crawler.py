@@ -5,7 +5,7 @@
 import os
 import feedparser
 import pandas as pd
-import sherlockml.filesystem as sfs
+import sherlockml datasets
 from urllib.request import urlopen
 from pathlib import Path
 from datetime import datetime
@@ -90,8 +90,8 @@ def release_lock():
   remove_file(LOCK_FILE)
 
 def get_todays_dataframe():
-  if TODAY_CSV in sfs.ls():
-    sfs.get(TODAY_CSV, TMP_CSV)
+  if TODAY_CSV in datasets.ls():
+    datasets.get(TODAY_CSV, TMP_CSV)
     df = pd.read_csv(TMP_CSV, sep='\t', encoding='utf-8')
     if os.path.exists(TMP_CSV):
       os.remove(TMP_CSV)
@@ -101,7 +101,7 @@ def get_todays_dataframe():
 def save_data_frame(df):
   remove_file(TMP_CSV)
   df.to_csv(TMP_CSV, sep='\t', encoding='utf-8', index=False)
-  sfs.put(TMP_CSV, TODAY_CSV)
+  datasets.put(TMP_CSV, TODAY_CSV)
 
 def parse_article(bias_level, bias, source_label, source_name, article_url, article_title):
   try:
