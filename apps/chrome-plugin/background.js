@@ -11,6 +11,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
       'display: flex;',
       'flex-direction: column;',
       'z-index: 999999999;',
+      'box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);',
     ].join(''),
     header: [
       'display: flex;',
@@ -81,7 +82,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     const config = {
       method: 'GET',
       headers: {
-        'SherlockML-UserAPI-Key': '',
+        'SherlockML-UserAPI-Key': 'rdiyMKHKcMfIQrwSTfu6nMICOTBdcnccOAsdl7vDJIvgXeLqoh',
       },
     };
     fetch(url, config)
