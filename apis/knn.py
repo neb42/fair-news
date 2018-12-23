@@ -97,7 +97,7 @@ class NewsArticleClassifier(object):
         tfidf_matrix = tfidf_vectorizer.fit_transform(named_entities_list)
         
         # Fit KNN
-        nbrs = NearestNeighbors(n_neighbors=10) 
+        nbrs = NearestNeighbors(n_neighbors=20) 
         nbrs.fit(tfidf_matrix)
         
         # Predict
@@ -106,9 +106,9 @@ class NewsArticleClassifier(object):
         
         # Format predictions
         similar_articles = {
-            left: None,
-            center: None,
-            right: None,
+            'left': None,
+            'center': None,
+            'right': None,
         }
         for idx, val in enumerate(indices.flatten()[1:]):
             article = articles[val]
@@ -122,6 +122,7 @@ class NewsArticleClassifier(object):
                         'title': article.title,
                         'url': article.url,
                         'description': article.description,
+                        'source_id': article.source_id,
                     }
             elif bias == 0:
                 current_center = similar_articles['center']
@@ -130,7 +131,9 @@ class NewsArticleClassifier(object):
                         'distance': distance,
                         'title': article.title,
                         'url': article.url,
-                        'description': article.description,
+                        'description': article.description,    
+                        'source_id': article.source_id,
+
                     }       
             elif bias == -1:
                 current_right = similar_articles['right']
@@ -139,7 +142,8 @@ class NewsArticleClassifier(object):
                         'distance': distance,
                         'title': article.title,
                         'url': article.url,
-                        'description': article.description,
+                        'description': article.description,          
+                        'source_id': article.source_id,
                     }  
 
         return similar_articles
