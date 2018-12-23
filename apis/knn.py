@@ -111,40 +111,31 @@ class NewsArticleClassifier(object):
             'right': None,
         }
         for idx, val in enumerate(indices.flatten()[1:]):
+            if val == len(articles):
+                continue
             article = articles[val]
             distance = distances.flatten()[idx]
             bias = article.bias
+            article_json = {
+                'distance': distance,
+                'title': article.title,
+                'url': article.url,
+                'description': article.description,
+                'source_id': article.source_id,
+                'named_entities': article.named_entities,
+            }
             if bias == 1:
                 current_left = similar_articles['left']
                 if current_left is None or distance > current_left['distance']:
-                    similar_articles['left'] = {
-                        'distance': distance,
-                        'title': article.title,
-                        'url': article.url,
-                        'description': article.description,
-                        'source_id': article.source_id,
-                    }
+                    similar_articles['left'] = article_json
             elif bias == 0:
                 current_center = similar_articles['center']
                 if current_center is None or distance > current_center['distance']:
-                    similar_articles['center'] = {
-                        'distance': distance,
-                        'title': article.title,
-                        'url': article.url,
-                        'description': article.description,    
-                        'source_id': article.source_id,
-
-                    }       
+                    similar_articles['center'] = article_json      
             elif bias == -1:
                 current_right = similar_articles['right']
                 if current_right is None or distance > current_right['distance']:
-                    similar_articles['right'] = {
-                        'distance': distance,
-                        'title': article.title,
-                        'url': article.url,
-                        'description': article.description,          
-                        'source_id': article.source_id,
-                    }  
+                    similar_articles['right'] = article_json 
 
         return similar_articles
      
