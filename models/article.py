@@ -25,7 +25,7 @@ source_id_to_bias = {
     'vice-news': 1,
     'the-guardian-uk': 1,
     'independent': 1,
-    'the-economist': 1,
+    'the-economist': -1,
     'the-telegraph': -1,
     'the-new-york-times': 1,
     'the-wall-street-journal': -1,
