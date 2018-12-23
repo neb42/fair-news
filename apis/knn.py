@@ -126,15 +126,15 @@ class NewsArticleClassifier(object):
             }
             if bias == 1:
                 current_left = similar_articles['left']
-                if current_left is None or distance > current_left['distance']:
+                if current_left is None or distance < current_left['distance']:
                     similar_articles['left'] = article_json
             elif bias == 0:
                 current_center = similar_articles['center']
-                if current_center is None or distance > current_center['distance']:
+                if current_center is None or distance < current_center['distance']:
                     similar_articles['center'] = article_json      
             elif bias == -1:
                 current_right = similar_articles['right']
-                if current_right is None or distance > current_right['distance']:
+                if current_right is None or distance < current_right['distance']:
                     similar_articles['right'] = article_json 
 
         return similar_articles
