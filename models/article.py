@@ -1,12 +1,15 @@
 import os
+import ast
 import uuid
+import pandas as pd
+import psycopg2.extras
 from goose3 import Goose
 from nltk import ne_chunk, pos_tag, word_tokenize
 from nltk.tree import Tree
 from newsapi import NewsApiClient
 from multiprocessing import Process, Queue
 from dateutil import parser
-import psycopg2.extras
+from sherlockml import datasets
 
 from database.connect import connect
 
@@ -17,6 +20,19 @@ NEWS_SOURCES = os.environ['NEWS_SOURCES'].split(' ')
 
 goose = Goose()
 
+source_id_to_bias = {
+    'bbc-news': 0,
+    'vice-news': 1,
+    'the-guardian-uk': 1,
+    'independent': 1,
+    'the-economist': 1,
+    'the-telegraph': -1,
+    'the-new-york-times': 1,
+    'the-wall-street-journal': -1,
+    'reuters': 0,
+    'associated-press': 0,
+}
+
 class Article:
     def __init__(
         self,
@@ -24,7 +40,7 @@ class Article:
         title,
         description,
         source_id,
-        published_at,
+        published_at=None,
         article_uuid=None,
         named_entities=None,
         id=None,
@@ -34,6 +50,7 @@ class Article:
         self.title = title
         self.description = description
         self.source_id = source_id
+        self.bias = source_id_to_bias.get(source_id, None)
         self.article_uuid = article_uuid or uuid.uuid4()
         self.id = id
 
@@ -133,6 +150,28 @@ class Article:
             print('Running on single core')
             articles = single_core_article_builder()
         print('Finished building articles')
+        return articles
+        
+    @staticmethod
+    def load_articles_from_datasets(article_date):
+        articles = []
+        with datasets.open(f'/input/article_content/{article_date}.csv') as f:
+            df = pd.read_csv(f, sep='\t', encoding='utf-8')
+        for row in df.iterrows():
+            try:
+                articles.append(Article(
+                    row[1]['article_url'], 
+                    row[1]['article_title'],
+                    row[1]['article_description'],
+                    row[1]['source_id'],
+                    row[1]['published_at'],
+                    row[1]['article_uuid'],
+                    ast.literal_eval(row[1]['named_entities']),
+                    None,
+                    row[1]['raw_content']
+                ))
+            except:
+                pass
         return articles
         
     @staticmethod
