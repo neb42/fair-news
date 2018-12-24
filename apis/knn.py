@@ -35,7 +35,7 @@ class BaseException(Exception):
         rv = dict(self.payload or ())
         rv['message'] = self.message
         return rv
-      
+
 class BadlyFormattedRequestBody(BaseException):
     status_code = 400
     message = ''
@@ -43,11 +43,11 @@ class BadlyFormattedRequestBody(BaseException):
 class NoNamedEntities(BaseException):
     status_code = 400
     message = ''
-    
+
 class NoArticlesFound(BaseException):
     status_code = 404
     message = ''
-    
+
 @flask_server.errorhandler(BadlyFormattedRequestBody)
 def handle_badly_formatted_request_body(error):
     return handle_custom_exception(error)
@@ -55,7 +55,7 @@ def handle_badly_formatted_request_body(error):
 @flask_server.errorhandler(NoNamedEntities)
 def handle_no_named_entities(error):
     return handle_custom_exception(error)
-    
+
 @flask_server.errorhandler(NoArticlesFound)
 def handle_no_articles_found(error):
     return handle_custom_exception(error)
@@ -70,11 +70,11 @@ class NewsArticleClassifier(object):
         # TODO: url results can be cached
         # Get named entities for requested url
         test_article = Article(url, '', '', '')
-        
+
         # Return an error if no named entities were found
         if len(test_article.named_entities) == 0:
             raise NoNamedEntities()
-        
+
         # TODO: Add some caching for this
         # Fetch articles with the same publish date
         try:
@@ -83,27 +83,27 @@ class NewsArticleClassifier(object):
             )
         except SherlockMLDatasetsError:
             raise NoArticlesFound()
-        
+
         # Return an error if no articles were found for the published date
         if len(articles) == 0:
             raise NoArticlesFound()
-        
+
         # List of named entities
         named_entities_list = list(map(lambda x: ' '.join(x.named_entities), articles))
         named_entities_list.append(' '.join(test_article.named_entities))
-        
+
         # TF-IDF matrix
         tfidf_vectorizer = TfidfVectorizer()
         tfidf_matrix = tfidf_vectorizer.fit_transform(named_entities_list)
-        
+
         # Fit KNN
-        nbrs = NearestNeighbors(n_neighbors=20) 
+        nbrs = NearestNeighbors(n_neighbors=20)
         nbrs.fit(tfidf_matrix)
-        
+
         # Predict
         test_row = tfidf_matrix.getrow(len(named_entities_list) - 1)
         distances, indices = nbrs.kneighbors(test_row)
-        
+
         # Format predictions
         similar_articles = {
             'left': None,
@@ -113,7 +113,12 @@ class NewsArticleClassifier(object):
         for idx, val in enumerate(indices.flatten()[1:]):
             if val == len(articles):
                 continue
+
             article = articles[val]
+
+            if article.url == test_article.url:
+                continue
+
             distance = distances.flatten()[idx]
             bias = article.bias
             article_json = {
@@ -124,6 +129,7 @@ class NewsArticleClassifier(object):
                 'source_id': article.source_id,
                 'named_entities': article.named_entities,
             }
+
             if bias == 1:
                 current_left = similar_articles['left']
                 if current_left is None or distance < current_left['distance']:
@@ -131,14 +137,14 @@ class NewsArticleClassifier(object):
             elif bias == 0:
                 current_center = similar_articles['center']
                 if current_center is None or distance < current_center['distance']:
-                    similar_articles['center'] = article_json      
+                    similar_articles['center'] = article_json
             elif bias == -1:
                 current_right = similar_articles['right']
                 if current_right is None or distance < current_right['distance']:
-                    similar_articles['right'] = article_json 
+                    similar_articles['right'] = article_json
 
         return similar_articles
-     
+
 
 classifier = NewsArticleClassifier()
 
