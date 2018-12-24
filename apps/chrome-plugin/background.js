@@ -4,7 +4,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
       'all: unset;',
       'position: fixed;',
       'top: 50%;',
-      'right: 0;',
+      'right: 15px;',
       'margin-top: -100px;',
       'background-color: #fff;',
       'width: 400px;',
@@ -15,7 +15,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     ].join(''),
     header: [
       'display: flex;',
-      'justify-content: space-between',
+      'justify-content: space-between;',
       'align-items: center;',
       'padding: 10px 20px 0 10px;',
     ].join(''),
@@ -46,7 +46,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
       'font-weight: 500;',
     ].join(''),
     source: [
-      'font-size: 12px;',
+      'font-size: 14px;',
       'font-weight: 400;',
     ].join(''),
   };
