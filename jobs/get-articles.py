@@ -18,25 +18,25 @@ from models.raw_article import RawArticle
 def fetch_articles_for_date(date_to_parse):
     from_date = date_to_parse
     to_date = date_to_parse + timedelta(days=1)
-    
+
     # Fetch raw articles
     raw_articles = RawArticle.get_raw_articles(
         from_date.strftime('%Y-%m-%d'),
         to_date.strftime('%Y-%m-%d')
     )
-    
+
     # Build articles and insert into database
     articles = Article.build_articles(raw_articles)
-    
-    return articles
-  
-   
+
+    return [a for a in articles if a.published_at is not None and len(a.named_entities) > 0]
+
+
 def build_dataframe(articles):
     # Store raw article content in datasets for later analysis
     df = pd.DataFrame.from_records(
         [{
             'article_title': x.title,
-            'article_uuid': x.article_uuid, 
+            'article_uuid': x.article_uuid,
             'article_url': x.url,
             'article_description': x.description,
             'source_id': x.source_id,
@@ -46,16 +46,16 @@ def build_dataframe(articles):
         } for x in articles if x.title is not None and x.description is not None]
     ).drop_duplicates(subset='article_url').reset_index(drop=True)
     return df
-    
-    
+
+
 def save_dataframe_to_datasets(df, parsed_date):
     tmp = tempfile.NamedTemporaryFile()
     with open(tmp.name, 'w') as f:
         df.to_csv(tmp.name, sep='\t', encoding='utf-8', index=False)
     date_str = parsed_date.strftime('%Y-%m-%d')
     datasets.put(tmp.name, f'/input/article_content/{date_str}.csv')
- 
-    
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
