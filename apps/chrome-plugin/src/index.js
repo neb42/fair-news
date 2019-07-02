@@ -90,7 +90,33 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     `;
   }
 
-  if (changeInfo.url && !changeInfo.url.startsWith('chrome')) {
+  function addSimilarArticlesToPage(similarArticles) {
+    chrome.tabs.executeScript({
+      code: 'document.body.innerHTML += \'' +
+        buildHTML(similarArticles).replace(/(\r\n\t|\n|\r\t)/gm,"") +
+        '\';',
+      });
+  }
+
+  function setupTensorflow() {
+    chrome.tabs.executeScript(tab.id, {
+      code: 'document.body.appendChild(document.createElement("script")).src = "https://cdnjs.cloudflare.com/ajax/libs/tensorflow/1.2.2/tf.min.js";',
+    });
+  }
+
+  function getPageContent() {
+    return '';
+  }
+
+  function checkForNewsArticle() {
+    const modelUrl = 'https://storage.googleapis.com/faculty-models/model.json';
+    tf.loadLayersModel(modelUrl).then(function(model) {
+      const prediction = model.predict(getPageContent());
+      return prediction === 'news';
+    });
+  }
+
+  function getSimilarArticles() {
     const url = 'https://fair-news-knn.api.sherlockml.io/predict?url=' + encodeURIComponent(changeInfo.url);
     const config = {
       method: 'GET',
@@ -106,12 +132,18 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
           return Promise.resolve();
       })
       .then(function(json) {
-        if (json) {
-          chrome.tabs.executeScript({ code: 'document.body.innerHTML += \'' + buildHTML(json.similar_articles).replace(/(\r\n\t|\n|\r\t)/gm,"") + '\';' });
-        }
-      })
-      .catch(function(error) {
-        console.log(error);
+        return json.similar_articles;
       });
+  }
+
+  if (changeInfo.url && !changeInfo.url.startsWith('chrome')) {
+    setupTensorflow();
+    checkForNewsArticle().then(function (isNewsArticle) {
+      if (isNewsArticle) {
+        getSimilarArticles().then(addSimilarArticlesToPage);
+      }
+    }).catch(function(error) {
+
+    });
   }
 });

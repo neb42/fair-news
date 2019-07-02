@@ -1,6 +1,8 @@
 {
   "name": "Polar News",
   "version": "1.0.0",
+  "author": "Ben McAlindin",
+  "description": "",
   "manifest_version": 2,
   "background": {
     "scripts": ["background.js"]
@@ -10,5 +12,8 @@
     "activeTab",
     "http://*/",
     "https://*/"
+  ],
+  "web_accessible_resources": [
+    "background.js.map"
   ]
 }
