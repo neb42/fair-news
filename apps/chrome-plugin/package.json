@@ -52,5 +52,9 @@
     "webpack-cli": "^3.3.5",
     "webpack-merge": "^4.1.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@babel/runtime": "^7.4.5",
+    "@tensorflow/tfjs": "^1.2.2",
+    "axios": "^0.19.0"
+  }
 }
