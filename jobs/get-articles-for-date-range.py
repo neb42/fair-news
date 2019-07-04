@@ -9,7 +9,7 @@ if '/project/fair-news' not in sys.path:
 import tempfile
 import click
 import pandas as pd
-import sherlockml import datasets
+from faculty import datasets
 from dateutil import parser
 from datetime import datetime, timedelta
 

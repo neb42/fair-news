@@ -5,7 +5,7 @@
 import os
 import feedparser
 import pandas as pd
-import sherlockml datasets
+from faculty import datasets
 from urllib.request import urlopen
 from pathlib import Path
 from datetime import datetime

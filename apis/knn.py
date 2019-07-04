@@ -12,7 +12,7 @@ from flask import Flask, jsonify, request, abort, make_response
 import pandas as pd
 from sklearn.neighbors import NearestNeighbors
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sherlockml.datasets.session import SherlockMLDatasetsError
+from faculty.datasets.session import DatasetsError
 
 from models.article import Article
 

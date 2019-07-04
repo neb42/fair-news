@@ -9,7 +9,7 @@ from nltk.tree import Tree
 from newsapi import NewsApiClient
 from multiprocessing import Process, Queue
 from dateutil import parser
-from sherlockml import datasets
+from faculty import datasets
 
 from database.connect import connect
 
