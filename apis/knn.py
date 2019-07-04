@@ -116,7 +116,7 @@ class NewsArticleClassifier(object):
 
             article = articles[val]
 
-            if article.url == test_article.url or len(article.named_entities) == 0:
+            if article.url == test_article.url or len(article.named_entities) <= 1:
                 continue
 
             distance = distances.flatten()[idx]

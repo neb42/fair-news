@@ -28,7 +28,7 @@ def fetch_articles_for_date(date_to_parse):
     # Build articles and insert into database
     articles = Article.build_articles(raw_articles)
 
-    return [a for a in articles if a.published_at is not None and len(a.named_entities) > 0]
+    return [a for a in articles if a.published_at is not None and len(a.named_entities) > 1]
 
 
 def build_dataframe(articles):
