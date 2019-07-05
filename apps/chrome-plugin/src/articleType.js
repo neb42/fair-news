@@ -24,13 +24,13 @@ const loadBagOfWords = async () => {
   return response.data;
 };
 
-const getPageContent = () => {
-  const { content } = await Mercury.parse(url);
-  return content.replace(/(<([^>]+)>)/ig, '');
+const getPageContent = async (url) => {
+  const page = await Mercury.parse(url);
+  return page.content.replace(/(<([^>]+)>)/ig, '');
 };
 
-const getPageVector = async () => {
-  const content = getPageContent();
+const getPageVector = async (url) => {
+  const content = await getPageContent(url);
   const bagOfWords = await loadBagOfWords();
   const vocab = new Array(maxWords).fill('');
   Object.keys(bagOfWords).forEach(key => {
@@ -42,17 +42,20 @@ const getPageVector = async () => {
   return mimir.bow(content, { words: vocab }).map(v => v === 0 ? 0 : 1);
 };
 
-const getArticleType = async () => {
-  const model = await loadModel();
-  const labelClasses = await loadLabelClasses();
-  const vector = await getPageVector();
+const getArticleType = async (url) => {
+  const [ model, labelClasses, vector ] = await Promise.all([
+    loadModel(),
+    loadLabelClasses(),
+    getPageVector(url),
+  ]);
   const predictionsTensor = model.predict(tf.tensor([vector]));
   const predictions = Array.from(predictionsTensor.dataSync()); 
   const classIndex = predictions.indexOf(Math.max(...predictions));
   return labelClasses[classIndex];
 };
 
-export const validateArticleType = async () => {
-  const articleType = await getArticleType();
+export const validateArticleType = async (url) => {
+  const articleType = await getArticleType(url);
+  console.log('article type prediction: ', articleType)
   return validCategories.includes(articleType);
 };

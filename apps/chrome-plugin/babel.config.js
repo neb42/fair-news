@@ -1,6 +1,7 @@
 module.exports = function (api) {
   api.cache(true);
   return {
+    sourceMaps: true,
     presets: [
       '@babel/preset-env',
       '@babel/preset-react',

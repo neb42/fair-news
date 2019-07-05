@@ -1,14 +1,14 @@
 import axios from 'axios';
 
-const baseUrl = 'https://fair-news-knn.api.sherlockml.io';
+const baseUrl = 'https://fair-news-knn.api.cloud.my.faculty.ai';
 const apiKey = 'rdiyMKHKcMfIQrwSTfu6nMICOTBdcnccOAsdl7vDJIvgXeLqoh';
 
-export const getSimilarArticles = async () => {
+export const getSimilarArticles = async (url) => {
   const response = await axios.get(
-    `${baseUrl}/predict?url=${encodeURIComponent(changeInfo.url)}`,
+    `${baseUrl}/predict?url=${encodeURIComponent(url)}`,
     {
       headers: {
-        'SherlockML-UserAPI-Key': apiKey,
+        'UserAPI-Key': apiKey,
       },
     }
   );
