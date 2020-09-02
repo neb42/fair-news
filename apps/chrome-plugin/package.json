@@ -36,7 +36,7 @@
     "@types/chrome": "0.0.86",
     "babel-eslint": "^10.0.2",
     "babel-loader": "^8.0.6",
-    "bestzip": "^2.1.2",
+    "bestzip": "^2.1.7",
     "eslint": "^6.0.1",
     "eslint-import-resolver-webpack": "^0.11.1",
     "eslint-plugin-flowtype": "^3.0.0",
